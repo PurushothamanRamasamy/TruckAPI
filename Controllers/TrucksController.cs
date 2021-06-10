@@ -1,10 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using TruckAPI.Models;
 using TruckAPI.Repository;
 
@@ -57,6 +52,15 @@ namespace TruckAPI.Controllers
 
             Message message = new();
             message.message = _context.InsertTruckDetail(truck);
+            return message;
+
+        }
+        [HttpDelete("{truckNumber}")]
+        public ActionResult<Message> DeleteTruck(string truckNumber)
+        {
+
+            Message message = new();
+            message.message = _context.DeleteTruck(truckNumber);
             return message;
 
         }

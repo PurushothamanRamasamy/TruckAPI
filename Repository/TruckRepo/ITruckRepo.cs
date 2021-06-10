@@ -15,5 +15,7 @@ namespace TruckAPI.Repository
         bool TruckExists(string id);
 
         Truck GetTruck(string truckNumber);
+
+        string DeleteTruck(string truckNumber);
     }
 }

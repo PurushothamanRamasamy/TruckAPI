@@ -20,6 +20,18 @@ namespace TruckAPI.Repository
             _context = context;
         }
 
+        public string DeleteTruck(string truckNumber)
+        {
+            var truckdelete = _context.Trucks.Find(truckNumber);
+            if (truckdelete!=null)
+            {
+                _context.Trucks.Remove(truckdelete);
+                _context.SaveChanges();
+                return truckdelete.TruckNumber + " successfully deleted";
+            }
+            return truckNumber + " Not found";
+        }
+
         public Truck GetTruck(string truckNumber)
         {
             Truck result = _context.Trucks.FirstOrDefault(e => e.TruckNumber == truckNumber);
