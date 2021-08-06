@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-
-#nullable disable
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace TruckAPI.Models
 {
-    public partial class Service
+    public class SearchTruck
     {
         public int ServiceId { get; set; }
         public int CustomerId { get; set; }
@@ -17,11 +17,5 @@ namespace TruckAPI.Models
         public string PickupCity { get; set; }
         public string DropCity { get; set; }
         public int ServiceCost { get; set; }
-
-
-
-
-
-
     }
 }

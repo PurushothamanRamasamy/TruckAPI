@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,10 +14,10 @@ namespace TruckAPI.Repository.UserRepo
 {
     public class UserRepo:IUserRepo
     {
-        private readonly TruckAppDBContext _context;
-        public UserRepo(TruckAppDBContext context)
+        private readonly IConfiguration Configuration;
+        public UserRepo(TruckAppDBContext context, IConfiguration _configuration)
         {
-            _context = context;
+            Configuration = _configuration;
         }
         public string Encryptdata(string password)
         {
@@ -36,16 +39,58 @@ namespace TruckAPI.Repository.UserRepo
             decryptpwd = new String(decoded_char);
             return decryptpwd;
         }
-        public ActionResult<IEnumerable<User>> GetUserDetails()
+        public IEnumerable<User> GetUserDetails()
         {
-            return _context.Users.ToList<User>();
+            List<User> URList = new List<User>();
+            using (SqlConnection conn = new SqlConnection(this.Configuration.GetConnectionString("DefaultConnection")))
+            {
+                SqlCommand sqlComm = new SqlCommand("S_AllUsers_P", conn)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+                conn.Open();
+                SqlDataReader dr = sqlComm.ExecuteReader();
+                while (dr.Read())
+                {
+                    User USR = new User
+                    {
+                        UserId = Convert.ToInt32(dr["UserId"]),
+                        MobileNumber = dr["MobileNumber"].ToString(),
+                        UserName = dr["UserName"].ToString(),
+                        UserRole = dr["UserRole"].ToString(),
+                        UserStatus = Convert.ToBoolean(dr["UserStatus"]),
+
+                        Password = dr["Password"].ToString()
+                        
+                    };
+                    URList.Add(USR);
+                }
+
+            }
+
+
+            return URList;
         }
         public string InsertUserDetail(User user)
         {
+            
             try
             {
-                _context.Users.Add(user);
-                _context.SaveChangesAsync();
+                using (SqlConnection conn = new SqlConnection(this.Configuration.GetConnectionString("DefaultConnection")))
+                {
+                    SqlCommand sqlComm = new SqlCommand("S_InsertUser_P", conn);
+                    sqlComm.Parameters.AddWithValue("@MobileNumber", user.MobileNumber);
+                    sqlComm.Parameters.AddWithValue("@UserName", user.UserName);
+                    sqlComm.Parameters.AddWithValue("@UserRole", user.UserRole);
+                    sqlComm.Parameters.AddWithValue("@UserStatus", user.UserStatus);
+                    sqlComm.Parameters.AddWithValue("@Password", user.Password); ;
+
+
+
+                    sqlComm.CommandType = CommandType.StoredProcedure;
+                    conn.Open();
+                    sqlComm.ExecuteNonQuery();
+                }
             }
             catch (Exception e)
             {
@@ -60,11 +105,26 @@ namespace TruckAPI.Repository.UserRepo
             {
                 return 400;//bad request
             }
-            _context.Entry(user).State = EntityState.Modified;
+           
 
             try
             {
-                _context.SaveChangesAsync();
+                using (SqlConnection conn = new SqlConnection(this.Configuration.GetConnectionString("DefaultConnection")))
+                {
+                    SqlCommand sqlComm = new SqlCommand("S_UpdateUser_P", conn);
+                    sqlComm.Parameters.AddWithValue("@id", id);
+                    sqlComm.Parameters.AddWithValue("@MobileNumber", user.MobileNumber);
+                    sqlComm.Parameters.AddWithValue("@UserName", user.UserName);
+                    sqlComm.Parameters.AddWithValue("@UserRole", user.UserRole);
+                    sqlComm.Parameters.AddWithValue("@UserStatus", user.UserStatus);
+                    sqlComm.Parameters.AddWithValue("@Password", user.Password); ;
+
+
+
+                    sqlComm.CommandType = CommandType.StoredProcedure;
+                    conn.Open();
+                    sqlComm.ExecuteNonQuery();
+                }
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -83,12 +143,34 @@ namespace TruckAPI.Repository.UserRepo
 
         public bool UserExists(int id)
         {
-            return _context.Users.Any(e => e.UserId == id);
+            return GetUserDetails().Any(e => e.UserId == id);
         }
 
         public User GetUser(string mobile)
         {
-            User result= _context.Users.FirstOrDefault(e => e.MobileNumber == mobile);
+            User result=new User();
+            using (SqlConnection conn = new SqlConnection(this.Configuration.GetConnectionString("DefaultConnection")))
+            {
+                SqlCommand sqlComm = new SqlCommand("S_IsRegisteredUser_P", conn);
+                sqlComm.Parameters.AddWithValue("@MobileNumber", mobile);
+                
+
+                sqlComm.CommandType = CommandType.StoredProcedure;
+                conn.Open();
+                SqlDataReader reader = sqlComm.ExecuteReader();
+                while (reader.Read())
+                {
+                    result.UserId = Convert.ToInt32(reader["UserId"]);
+                    result.MobileNumber = reader["MobileNumber"].ToString();
+                    result.UserName = reader["UserName"].ToString();
+                    result.UserRole = reader["UserRole"].ToString();
+                    result.UserStatus = Convert.ToBoolean(reader["UserStatus"]);
+                    result.Password = reader["Password"].ToString();
+                }
+
+            }
+            
+           
             if (result!=null)
             {
                 result.Password = Decryptdata(result.Password);

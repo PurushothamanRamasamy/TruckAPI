@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
+
 using TruckAPI.Models;
 using TruckAPI.Repository;
 
@@ -10,7 +12,7 @@ namespace TruckAPI.Controllers
     public class TrucksController : ControllerBase
     {
         private readonly ITruckRepo _context;
-
+        private static readonly log4net.ILog _log4net = log4net.LogManager.GetLogger(typeof(TrucksController));
 
         public TrucksController(ITruckRepo context)
         {
@@ -19,29 +21,67 @@ namespace TruckAPI.Controllers
 
         // GET: api/Trucks
         [HttpGet]
-        public  ActionResult<IEnumerable<Truck>> GetTrucks()
+        public  IEnumerable<Truck> GetTrucks()
         {
-            return  _context.GetTruckDetails();
+            
+            try
+            {
+                _log4net.Info("Get request for all trucks");
+
+                return _context.GetTruckDetails();
+            }
+            catch (System.Exception e)
+            {
+                _log4net.Error("Error Occured in getting all trucks"+ e.Message);
+                throw;
+
+            }
+        }
+        [HttpGet("pick:{Pickcity}/Drop:{Dropcity}/Type:{TruckType}/BDate:{Bookingdate}/approxDistance:{distance}")]
+        public IEnumerable<STruck> SearchTrucks(string Pickcity, string Dropcity, string TruckType, DateTime Bookingdate,int distance)
+        {
+
+            try
+            {
+                _log4net.Info("Get request for Search trucks");
+
+                return _context.SearchTruck(Pickcity, Dropcity, TruckType, Bookingdate,distance);
+            }
+            catch (System.Exception e)
+            {
+                _log4net.Error("Error Occured in Searching  trucks"+ e.Message);
+                throw;
+
+            }
         }
 
-        
 
         // PUT: api/Trucks/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public IActionResult PutTruck(string id, Truck truck)
         {
-            int result = _context.UpdateTruckDetails(id, truck);
-            if (result == 400)
+            try
             {
-                return BadRequest();
-            }
-            if (result == 404)
-            {
-                return NotFound();
-            }
+                _log4net.Info("Requesting for edit truck having Truck Number " + id);
 
-            return NoContent();
+                int result = _context.UpdateTruckDetails(id, truck);
+                if (result == 400)
+                {
+                    return BadRequest();
+                }
+                if (result == 404)
+                {
+                    return NotFound();
+                }
+
+                return NoContent();
+            }
+            catch (System.Exception e)
+            {
+                _log4net.Error("Error Occured in editing trucks" + e.Message);
+                throw;
+            }
         }
 
         // POST: api/Trucks
@@ -50,30 +90,57 @@ namespace TruckAPI.Controllers
         public ActionResult<Message> PostTruck(Truck truck)
         {
 
-            Message message = new();
-            message.message = _context.InsertTruckDetail(truck);
-            return message;
+            try
+            {
+                _log4net.Info("Request to Add truck with Truck number " + truck.TruckNumber);
+                Message message = new();
+                message.message = _context.InsertTruckDetail(truck);
+                return message;
+            }
+            catch (System.Exception e)
+            {
+                _log4net.Error("Error Occured in adding truck" + e.Message);
+                throw;
+            }
 
         }
         [HttpDelete("{truckNumber}")]
         public ActionResult<Message> DeleteTruck(string truckNumber)
         {
+            try
+            {
+                _log4net.Info("Request to Delete truck with Truck number " + truckNumber);
+                Message message = new();
+                message.message = _context.DeleteTruck(truckNumber);
+                return message;
+            }
+            catch (System.Exception e)
+            {
+                _log4net.Error("Error Occured in Deleting truck" + e.Message);
+                throw;
+            }
 
-            Message message = new();
-            message.message = _context.DeleteTruck(truckNumber);
-            return message;
 
         }
         [HttpGet("{truckNumber}")]
-        public IActionResult GetUserByMobile(string truckNumber)
+        public IActionResult GetTruckByTruckNumber(string truckNumber)
         {
-            Truck result = _context.GetTruck(truckNumber);
-            if (result != null)
+            try
             {
+                _log4net.Info("Request to get truck with Truck number " + truckNumber);
+                Truck result = _context.GetTruck(truckNumber);
+                if (result != null)
+                {
+                    return Ok(result);
+                }
+                result = new Truck();
                 return Ok(result);
             }
-            result = new Truck();
-            return Ok(result);
+            catch (System.Exception e)
+            {
+                _log4net.Error("Error Occured in Deleting truck" + e.Message);
+                throw;
+            }
         }
 
 

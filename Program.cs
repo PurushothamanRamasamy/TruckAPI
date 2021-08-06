@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,6 +14,7 @@ namespace TruckAPI
     {
         public static void Main(string[] args)
         {
+            
             CreateHostBuilder(args).Build().Run();
         }
 
@@ -20,7 +22,13 @@ namespace TruckAPI
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    webBuilder.UseStartup<Startup>()
+                    .ConfigureLogging((hostingContext, logging) =>
+                    {
+                        logging.AddLog4Net();
+                        logging.SetMinimumLevel(LogLevel.Debug);
+                    });
+
                 });
     }
 }

@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-
-#nullable disable
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace TruckAPI.Models
 {
-    public partial class Truck
+    public class STruck
     {
-        
-
         public string TruckNumber { get; set; }
         public string TruckType { get; set; }
         public int ManagerId { get; set; }
@@ -17,7 +15,6 @@ namespace TruckAPI.Models
         public string PickCity { get; set; }
         public string DropCity { get; set; }
         public bool TruckStatus { get; set; }
-
-
+        public int Cost { get; set; }
     }
 }

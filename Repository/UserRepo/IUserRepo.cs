@@ -14,7 +14,7 @@ namespace TruckAPI.Repository.UserRepo
 
         
         string InsertUserDetail(User user);
-        ActionResult<IEnumerable<User>> GetUserDetails();
+        IEnumerable<User> GetUserDetails();
         int UpdateUserDetails(int id, User user);
         bool UserExists(int id);
         User GetUser(string mobile);

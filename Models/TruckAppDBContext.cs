@@ -73,12 +73,9 @@ namespace TruckAPI.Models
             {
                 entity.ToTable("Service");
 
-                entity.Property(e => e.PickandDropCity)
-                    .IsRequired()
-                    .HasMaxLength(200)
-                    .IsUnicode(false);
+               
 
-                entity.Property(e => e.ServiceDate).HasColumnType("date");
+                entity.Property(e => e.BookingDate).HasColumnType("date");
 
                 entity.Property(e => e.TruckNumber)
                     .IsRequired()

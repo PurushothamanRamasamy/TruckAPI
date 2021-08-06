@@ -60,7 +60,7 @@ namespace TruckAPI
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
             {
@@ -75,7 +75,7 @@ namespace TruckAPI
                .SetIsOriginAllowed(origin => true) // allow any origin
                .AllowCredentials());
             app.UseHttpsRedirection();
-
+            loggerFactory.AddLog4Net();
             app.UseRouting();
 
             app.UseAuthorization();

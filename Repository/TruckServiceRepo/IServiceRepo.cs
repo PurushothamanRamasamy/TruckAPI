@@ -10,8 +10,9 @@ namespace TruckAPI.Repository.TruckServiceRepo
     public interface IServiceRepo
     {
         string InsertServiceDetail(Service service);
-        ActionResult<IEnumerable<Service>> GetServiceDetails();
+        IEnumerable<Service> GetServiceDetails();
         int UpdateServiceDetails(int id, Service service);
         bool ServiceExists(int id);
+        IEnumerable<Request> BookingRequest(int id);
     }
 }

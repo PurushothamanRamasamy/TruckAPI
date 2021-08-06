@@ -16,6 +16,7 @@ namespace TruckAPI.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserRepo _context;
+        private static readonly log4net.ILog _log4net = log4net.LogManager.GetLogger(typeof(UsersController));
 
         public UsersController(IUserRepo context)
         {
@@ -24,29 +25,52 @@ namespace TruckAPI.Controllers
 
         // GET: api/Users
         [HttpGet]
-        public  ActionResult<IEnumerable<User>> GetUsers()
+        public  IEnumerable<User> GetUsers()
         {
-            var result =  _context.GetUserDetails();
-            return  result;
+            try
+            {
+                _log4net.Info("Get request for all Services");
+                var result = _context.GetUserDetails();
+                return result;
+            }
+            catch (Exception e)
+            {
+                _log4net.Info("Error Occured in getting all users list" + e.Message);
+
+                throw;
+            }
+            
         }
 
         // PUT: api/Users/5
         [HttpPut("{id}")]
         public IActionResult PutUser(int id, User user)
         {
-            string encryptdata =_context.Encryptdata(user.Password);
-            user.Password = encryptdata;
-            int result = _context.UpdateUserDetails(id, user);
-            if(result==400)
+            try
             {
-                return BadRequest();
-            }
-            if(result==404)
-            {
-                return NotFound();
-            }
+                _log4net.Info("Request to edit user with id "+id);
 
-            return NoContent();
+                string encryptdata = _context.Encryptdata(user.Password);
+                user.Password = encryptdata;
+                int result = _context.UpdateUserDetails(id, user);
+                if (result == 400)
+                {
+                    return BadRequest();
+                }
+                if (result == 404)
+                {
+                    return NotFound();
+                }
+
+                return NoContent();
+            }
+            catch (Exception e)
+            {
+                _log4net.Info("Error Occured in editing  user" + e.Message);
+
+                throw;
+            }
+            
         }
 
         // POST: api/Users
@@ -54,21 +78,44 @@ namespace TruckAPI.Controllers
         [HttpPost]
         public string PostUser(User user)
         {
-            string encryptdata = _context.Encryptdata(user.Password);
-            user.Password = encryptdata;
-            return _context.InsertUserDetail(user);        
+            try
+            {
+                _log4net.Info("Request to add user with name " + user.UserName);
+
+                string encryptdata = _context.Encryptdata(user.Password);
+                user.Password = encryptdata;
+                return _context.InsertUserDetail(user);
+            }
+            catch (Exception e)
+            {
+                _log4net.Info("Error Occured in editing  user" + e.Message);
+
+                throw;
+            }
+                    
         }
         
         [HttpGet("{Mobile}")]
         public IActionResult GetUserByMobile(string Mobile)
         {
-            User result = _context.GetUser(Mobile);
-            if (result!=null)
+            try
             {
+                _log4net.Info("Request to edit user with mobile " +Mobile);
+
+                User result = _context.GetUser(Mobile);
+                if (result != null)
+                {
+                    return Ok(result);
+                }
+                result = new User();
                 return Ok(result);
             }
-            result = new User();
-            return Ok(result);
+            catch (Exception e)
+            {
+                _log4net.Info("Error Occured in get user" + e.Message);
+
+                throw;
+            }
         }
 
     }

@@ -16,6 +16,7 @@ namespace TruckAPI.Controllers
     public class TruckServicesController : ControllerBase
     {
         private readonly IServiceRepo _context;
+        private static readonly log4net.ILog _log4net = log4net.LogManager.GetLogger(typeof(TruckServicesController));
 
         public TruckServicesController(IServiceRepo context)
         {
@@ -24,10 +25,20 @@ namespace TruckAPI.Controllers
 
         // GET: api/Services
         [HttpGet]
-        public ActionResult<IEnumerable<Service>> GetServices()
+        public IEnumerable<Service> GetServices()
         {
-            var result = _context.GetServiceDetails();
-            return result;
+            try
+            {
+                _log4net.Info("Get request for all Services");
+                var result = _context.GetServiceDetails();
+                return result;
+            }
+            catch (Exception e)
+            {
+                _log4net.Info("Error Occured in getting all services " + e.Message);
+
+                throw;
+            }
         }
 
         
@@ -37,17 +48,27 @@ namespace TruckAPI.Controllers
         [HttpPut("{id}")]
         public  IActionResult PutService(int id, Service service)
         {
-            int result = _context.UpdateServiceDetails(id, service);
-            if (result == 400)
+            try
             {
-                return BadRequest();
-            }
-            if (result == 404)
-            {
-                return NotFound();
-            }
+                _log4net.Info("Get request for edit Service with id " + id);
+                int result = _context.UpdateServiceDetails(id, service);
+                if (result == 400)
+                {
+                    return BadRequest();
+                }
+                if (result == 404)
+                {
+                    return NotFound();
+                }
 
-            return NoContent();
+                return NoContent();
+            }
+            catch (Exception e)
+            {
+                _log4net.Info("Error Occured in editing service " + e.Message);
+
+                throw;
+            }
         }
 
         // POST: api/Services
@@ -55,10 +76,41 @@ namespace TruckAPI.Controllers
         [HttpPost]
         public IActionResult PostService(Service service)
         {
-            service.ServiceDate = DateTime.Today;
-            return Ok(_context.InsertServiceDetail(service));
+            try
+            {
+                _log4net.Info("Request to Add Service");
+
+                return Ok(_context.InsertServiceDetail(service));
+            }
+            catch (Exception e)
+            {
+                _log4net.Info("Error Occured in adding service " + e.Message);
+
+                throw;
+            }
+        }
+        [HttpGet("{Id}")]
+        public IActionResult GetUserByMobile(int Id)
+        {
+            try
+            {
+                _log4net.Info("Request to get request with service Id " + Id);
+
+                List<Request> result = _context.BookingRequest(Id).ToList();
+                if (result != null)
+                {
+                    return Ok(result);
+                }
+                result = new List<Request>();
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                _log4net.Info("Error Occured in getting service request " + e.Message);
+
+                throw;
+            }
         }
 
-       
     }
 }

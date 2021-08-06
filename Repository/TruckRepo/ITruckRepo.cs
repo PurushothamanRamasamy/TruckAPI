@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 
 using TruckAPI.Models;
@@ -10,10 +11,10 @@ namespace TruckAPI.Repository
          
 
         string InsertTruckDetail(Truck truck);
-        ActionResult<IEnumerable<Truck>> GetTruckDetails();
+        IEnumerable<Truck> GetTruckDetails();
         int UpdateTruckDetails(string id, Truck truck);
         bool TruckExists(string id);
-
+        IEnumerable<STruck> SearchTruck(string Pickcity, string Dropcity, string TruckType, DateTime Rdate, int distance);
         Truck GetTruck(string truckNumber);
 
         string DeleteTruck(string truckNumber);
